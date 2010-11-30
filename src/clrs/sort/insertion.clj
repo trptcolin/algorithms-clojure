@@ -1,12 +1,13 @@
 (ns clrs.sort.insertion
   (:refer-clojure :exclude [sort]))
 
-(defn insert [coll n]
-  (loop [start coll end '()]
-    (if (or (empty? start)
-            (> n (last start)))
-      (concat start (list n) end)
-      (recur (butlast start) (cons (last start) end)))))
+(defn insert
+  ([coll n] (insert coll '() n))
+  ([head tail n]
+   (if (or (empty? head)
+           (> n (last head)))
+     (concat head (cons n tail))
+     (recur (butlast head) (cons (last head) tail) n))))
 
 (defn sort
   ([coll-remaining coll-sorted]

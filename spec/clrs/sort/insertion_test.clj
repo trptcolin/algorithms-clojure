@@ -3,6 +3,9 @@
   (:use [speclj.core]))
 
 (describe "insert"
+  (it "works from an empty list"
+    (should= '(1) (isort/insert '() 1)))
+
   (it "works at start"
     (should= '(1 2 3) (isort/insert '(2 3) 1)))
 
