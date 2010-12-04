@@ -4,19 +4,19 @@
 
 (describe "insert"
   (it "works from an empty list"
-    (should= '(1) (isort/insert '() 1 <)))
+    (should= '(1) (isort/insert < '() 1)))
 
   (it "works at start"
-    (should= '(1 2 3) (isort/insert '(2 3) 1 <)))
+    (should= '(1 2 3) (isort/insert < '(2 3) 1)))
 
   (it "works at end"
-    (should= '(1 2 3) (isort/insert '(1 2) 3 <)))
+    (should= '(1 2 3) (isort/insert < '(1 2) 3)))
 
   (it "works in middle"
-    (should= '(1 2 3) (isort/insert '(1 3) 2 <)))
+    (should= '(1 2 3) (isort/insert < '(1 3) 2)))
 
   (it "works with a different ordering"
-    (should= '(3 2 1) (isort/insert '(3 1) 2 >))))
+    (should= '(3 2 1) (isort/insert > '(3 1) 2))))
 
 (describe "sort"
   (it "works if already sorted"

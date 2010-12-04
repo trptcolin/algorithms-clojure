@@ -2,19 +2,19 @@
   (:refer-clojure :exclude [sort]))
 
 (defn insert
-  ([coll n order] (insert coll () n order))
-  ([head tail n order]
+  ([order coll n] (insert order coll () n))
+  ([order head tail n]
    (if (or (empty? head)
            ((complement order) n (last head)))
      (concat head (cons n tail))
-     (recur (butlast head) (cons (last head) tail) n order))))
+     (recur order (butlast head) (cons (last head) tail) n))))
 
 (defn sort
-  ([coll] (sort coll <))
-  ([coll order]
-   (reduce (fn [coll-sorted n] (insert coll-sorted n order))
+  ([coll] (sort < coll))
+  ([order coll]
+   (reduce (fn [coll-sorted n] (insert order coll-sorted n))
            []
            coll)))
 
 (defn reverse-sort
-  ([coll] (sort coll >)))
+  ([coll] (sort > coll)))
