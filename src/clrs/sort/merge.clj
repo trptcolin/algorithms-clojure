@@ -19,12 +19,13 @@
 (defn sort
   ([coll] (sort < coll))
   ([order coll]
-    (let [n (count coll)]
-      (if (= 1 n)
-        coll
-        (let [[a b] (map (partial sort order)
-                         (split-at (int (/ n 2)) coll))]
-          (merge order a b))))))
+    (let [n (count coll)
+          midpoint (int (/ n 2))]
+      (if (<= n 1)
+          coll
+          (let [[a b] (map (partial sort order)
+                           (split-at midpoint coll))]
+            (merge order a b))))))
 
 (defn reverse-sort
   ([coll] (sort > coll)))

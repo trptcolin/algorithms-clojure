@@ -22,6 +22,9 @@
     (should= '(5 4 3 2 1) (msort/merge > '(5 3 1) '(4 2)))))
 
 (describe "sort"
+  (it "works with an empty list"
+    (should= () (msort/sort ())))
+
   (it "works if already sorted"
     (should= '(1 2 3 4 5) (msort/sort '(1 2 3 4 5))))
 
