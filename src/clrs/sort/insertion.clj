@@ -12,9 +12,7 @@
 (defn sort
   ([coll] (sort < coll))
   ([order coll]
-   (reduce (fn [coll-sorted n] (insert order coll-sorted n))
-           []
-           coll)))
+   (reduce (partial insert order) () coll)))
 
 (defn reverse-sort
   ([coll] (sort > coll)))
