@@ -7,16 +7,16 @@
          index-2 (nth coll index-1)))
 
 (defn max-heapify [coll index]
-  (let [left-index       (dec (* (inc index) 2))
-        right-index      (+ left-index 1)
-        existing-nodes   (map
-                           (fn [index] [index (nth coll index)])
-                           (filter
-                             (fn [index] (< index (count coll)))
-                             [left-index right-index index]))
-        index-of-largest (if (seq existing-nodes)
-                             (first (apply max-key last existing-nodes))
-                             index)]
+  (let [left-index          (dec (* (inc index) 2))
+        right-index         (+ left-index 1)
+        get-index-and-value (fn [index] [index (nth coll index nil)])
+        child-nodes         (filter
+                              (fn [[i x]] x)
+                              (map get-index-and-value
+                                   [left-index right-index]))
+        index-of-largest    (first (apply max-key last
+                                                  (get-index-and-value index)
+                                                  child-nodes))]
     (if (= index-of-largest index)
         coll
         (recur (swap-at coll index index-of-largest)
