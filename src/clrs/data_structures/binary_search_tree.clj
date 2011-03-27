@@ -6,26 +6,38 @@
 (defn right [index]
   (+ (* 2 index) 2))
 
+(defn make [elements]
+  (into {} (map-indexed vector elements)))
+
 (defn search
-  ([elements element] (search elements 0 element))
-  ([elements index element]
-   (let [this-value (get elements index)]
+  ([tree element] (search tree 0 element))
+  ([tree index element]
+   (let [this-value (get tree index)]
      (if (or (nil? this-value) (= element this-value))
          this-value
          (if (< element this-value)
-           (recur elements (left index) element)
-           (recur elements (right index) element))))))
+           (recur tree (left index) element)
+           (recur tree (right index) element))))))
 
-(defn- extrema [elements index extrema-so-far next-element-strategy]
-  (if-let [this-value (get elements index)]
-    (recur elements
+(defn- extrema [tree index best-so-far next-element-strategy]
+  (if-let [this-value (get tree index)]
+    (recur tree
            (next-element-strategy index)
            this-value next-element-strategy)
-    extrema-so-far))
+    best-so-far))
 
-(defn minimum [elements]
-  (extrema elements 0 nil left))
+(defn minimum [tree]
+  (extrema tree 0 nil left))
 
-(defn maximum [elements]
-  (extrema elements 0 nil right))
+(defn maximum [tree]
+  (extrema tree 0 nil right))
 
+(defn insert
+ ([tree new-element]
+  (insert tree 0 new-element))
+ ([tree index new-element]
+  (if-let [this-value (get tree index)]
+    (if (< new-element this-value)
+      (recur tree (left index) new-element)
+      (recur tree (right index) new-element))
+    (assoc tree index new-element))))
