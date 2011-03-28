@@ -2,76 +2,123 @@
   (:require [clrs.data-structures.binary-search-tree :as bst])
   (:use [speclj.core]))
 
+(describe "node"
+  (it "with no children"
+    (should= 42 (:value (bst/node 42))))
+  (it "with left and right children"
+    (let [node (bst/node 42
+                         :left (bst/node 7)
+                         :right (bst/node 100))]
+      (should= 42 (bst/value node))
+      (should= 7 (bst/value (:left node)))
+      (should= 100 (bst/value (:right node))))))
+
 (describe "search"
   (it "finds nothing in a fresh tree"
-    (should= nil (-> (bst/make [])
-                     (bst/search 42))))
+    (should= nil (-> (bst/node nil)
+                     (bst/search 42)
+                     :value)))
   (it "finds the root element"
-    (should= 42 (-> (bst/make [42])
-                    (bst/search 42))))
+    (should= 42 (-> (bst/node 42)
+                    (bst/search 42)
+                    :value)))
   (it "finds the left element"
-    (should= 40 (-> (bst/make [42 40])
-                    (bst/search 40))))
+    (should= 40 (-> (bst/node 42 :left (bst/node 40))
+                    (bst/search 40)
+                    :value)))
   (it "finds the right element"
-    (should= 44 (-> (bst/make [42 40 44])
-                    (bst/search 44))))
+    (should= 44 (-> (bst/node 42 :left (bst/node 40) :right (bst/node 44))
+                    (bst/search 44)
+                    :value)))
   (it "finds an element deeper in the tree"
-    (should= 39 (-> (bst/make [42 40 44 38 41 nil nil 37 39])
-                    (bst/search 39))))
+    (should= 39 (-> (bst/make 42 40 44 38 37 39)
+                    (bst/search 39)
+                    :value)))
+
   (it "doesn't find missing elements"
-    (should= nil (-> (bst/make [42 40 44 38 41 nil nil 37 39])
-                    (bst/search 46)))))
+    (should= nil (-> (bst/make 42 40 44 38 37 39)
+                     (bst/search 46)
+                     :value))))
+
 (describe "minimum"
   (it "has none for a fresh tree"
-    (should= nil (-> (bst/make [])
+    (should= nil (-> (bst/node nil)
                      (bst/minimum))))
   (it "is the root for a one-node tree"
-    (should= 1 (-> (bst/make [1])
+    (should= 1 (-> (bst/node 1)
                    (bst/minimum))))
   (it "gets the left node"
-    (should= 4 (-> (bst/make [5 4 6])
+    (should= 4 (-> (bst/node 5 :left (bst/node 4) :right (bst/node 6))
                    (bst/minimum))))
   (it "recurses to the left"
-    (should= 1 (-> [5
-                    4 6
-                    3 nil nil nil
-                    2 nil nil nil nil nil nil nil
-                    1]
-                   (bst/make)
-                   (bst/minimum))))
+    (should= 1 (-> (bst/make 5 4 6 3 2 1)
+                   (bst/minimum)))))
+
 (describe "maximum"
   (it "has none for a fresh tree"
-    (should= nil (-> [] (bst/make) (bst/maximum))))
+    (should= nil (-> (bst/node nil) (bst/maximum))))
   (it "is the root for a one-node tree"
-    (should= 1 (-> [1] (bst/make) (bst/maximum))))
+    (should= 1 (-> (bst/node 1) (bst/maximum))))
   (it "gets the left node"
-    (should= 6 (-> [5 4 6] (bst/make) (bst/maximum))))
+    (should= 6 (-> (bst/node 5 :left (bst/node 4) :right (bst/node 6))
+                   (bst/maximum))))
   (it "recurses to the right"
-    (should= 8 (-> [5
-                    4 6
-                    3 nil nil 7
-                    2 nil nil nil nil nil nil 8
-                    1]
-                   (bst/make)
+    (should= 8 (-> (bst/make 5 1 2 3 4 6 7 8)
                    (bst/maximum)))))
 
 (describe "insert"
   (it "round-trips from a fresh tree"
-    (should= 1 (-> []
-                   (bst/make)
+    (should= 1 (-> (bst/node nil)
                    (bst/insert 1)
-                   (bst/search 1))))
-  (it "round-trips from the left of a populated tree"
-    (should= 1 (-> [42 3]
-                   (bst/make)
+                   (bst/search 1)
+                   :value)))
+  (it "round-trips from the left"
+    (should= 1 (-> (bst/node 42
+                             :left (bst/node 3))
                    (bst/insert 1)
-                   (bst/search 1))))
-  (it "round-trips from the right of a populated tree"
-    (should= 43 (-> [42
-                      3 44
-                      1]
-                   (bst/make)
-                   (bst/insert 43)
-                   (bst/search 43)))))
-)
+                   (bst/search 1)
+                   :value)))
+  (it "round-trips from the right"
+    (should= 43 (-> (bst/node 42
+                              :left (bst/node 3
+                                              :left (bst/node 1))
+                              :right (bst/node 44))
+                    (bst/insert 43)
+                    (bst/search 43)
+                    :value)))
+  (it "round-trips from the middle"
+    (let [tree (-> (bst/node 42
+                              :left (bst/node 3
+                                              :left (bst/node 1)
+                                              :right (bst/node 6))
+                              :right (bst/node 44))
+                   (bst/insert 5))]
+      (should= 5 (:value (bst/search tree 5)))
+      (should= 6 (:value (bst/search tree 6))))))
+
+(describe "make"
+  (it "provides a simple construction mechanism"
+    (should= (bst/node 5
+                       :left (bst/node 4
+                                       :left (bst/node 3
+                                                       :left (bst/node 2
+                                                                       :left (bst/node 1))))
+                       :right (bst/node 6))
+             (bst/make 5 4 6 3 2 1))))
+;(describe "delete"
+;  (it "blows away a node without children"
+;    (should= nil (-> [42]
+;                     (bst/make)
+;                     (bst/delete 42)
+;                     (bst/search 42))))
+;  (it "blows away a node with one child"
+;    (let [tree (-> [42
+;                    3 43
+;                    nil 4]
+;                   (bst/make)
+;                   (bst/delete 3))]
+;      (should= nil (bst/search tree 3))
+;      (should= 4 (bst/search tree 4)))))
+
+
 

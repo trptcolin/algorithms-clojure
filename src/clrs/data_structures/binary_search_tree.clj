@@ -6,38 +6,67 @@
 (defn right [index]
   (+ (* 2 index) 2))
 
-(defn make [elements]
-  (into {} (map-indexed vector elements)))
+(defn value [node]
+  (:value node))
+
+(defn node [value & {:keys [left right] :as children}]
+  (assoc children :value value))
+
+(defn- next-element [current-node search-value]
+  (if (< search-value (:value current-node))
+    (:left current-node)
+    (:right current-node)))
 
 (defn search
-  ([tree element] (search tree 0 element))
-  ([tree index element]
-   (let [this-value (get tree index)]
-     (if (or (nil? this-value) (= element this-value))
-         this-value
-         (if (< element this-value)
-           (recur tree (left index) element)
-           (recur tree (right index) element))))))
+  ([node search-value]
+   (if (or (nil? (:value node)) (= search-value (:value node)))
+     node
+     (recur (next-element node search-value)
+            search-value))))
 
-(defn- extrema [tree index best-so-far next-element-strategy]
-  (if-let [this-value (get tree index)]
-    (recur tree
-           (next-element-strategy index)
-           this-value next-element-strategy)
+(defn- extrema [node best-so-far next-element-strategy]
+  (if-let [this-value (:value node)]
+    (recur (next-element-strategy node)
+           this-value
+           next-element-strategy)
     best-so-far))
 
-(defn minimum [tree]
-  (extrema tree 0 nil left))
+(defn minimum [node]
+  (extrema node nil :left))
 
-(defn maximum [tree]
-  (extrema tree 0 nil right))
+(defn maximum [node]
+  (extrema node nil :right))
 
-(defn insert
- ([tree new-element]
-  (insert tree 0 new-element))
- ([tree index new-element]
-  (if-let [this-value (get tree index)]
-    (if (< new-element this-value)
-      (recur tree (left index) new-element)
-      (recur tree (right index) new-element))
-    (assoc tree index new-element))))
+(defn next-direction [current-node search-value]
+  (if (< search-value (:value current-node))
+    :left
+    :right))
+
+(defn insert [root-node new-element]
+  (loop [path []]
+    (let [this-node (get-in root-node path)]
+      (if-let [this-value (:value this-node)]
+        (recur (conj path (next-direction this-node new-element)))
+        (assoc-in root-node (conj path :value) new-element)))))
+
+(defn make [element & more]
+  (loop [node (node element), more more]
+    (if (seq more)
+      (recur (insert node (first more)) (rest more))
+      node)))
+
+;(defn delete
+; ([tree element]
+;  (delete tree 0 element))
+; ([tree index element]
+;  (if-let [this-value (get tree index)]
+;    (cond (= this-value element)
+;            (dissoc tree index)
+;          (< this-value element)
+;            (delete tree (right index) element)
+;          :else
+;            (delete tree (left index) element))
+;
+;    tree)
+;  ))
+
