@@ -1,14 +1,5 @@
 (ns clrs.data-structures.binary-search-tree)
 
-(defn left [index]
-  (+ (* 2 index) 1))
-
-(defn right [index]
-  (+ (* 2 index) 2))
-
-(defn value [node]
-  (:value node))
-
 (defn node [value & {:keys [left right] :as children}]
   (assoc children :value value))
 
@@ -55,18 +46,29 @@
       (recur (insert node (first more)) (rest more))
       node)))
 
-;(defn delete
-; ([tree element]
-;  (delete tree 0 element))
-; ([tree index element]
-;  (if-let [this-value (get tree index)]
-;    (cond (= this-value element)
-;            (dissoc tree index)
-;          (< this-value element)
-;            (delete tree (right index) element)
-;          :else
-;            (delete tree (left index) element))
-;
-;    tree)
-;  ))
+(declare delete)
+(defn join [left right]
+  (node (minimum right)
+        :left left
+        :right (delete right (minimum right))))
+
+(defn delete [tree element]
+  (let [left      (:left tree)
+        right     (:right tree)]
+    (cond (nil? (:value tree))
+            nil
+          (< element (:value tree))
+            (node (:value tree)
+                  :left (delete left element)
+                  :right right)
+          (> element (:value tree))
+            (node (:value tree)
+                  :left left
+                  :right (delete right element))
+          (nil? left)
+            right
+          (nil? right)
+            left
+          :else
+            (join left right))))
 
